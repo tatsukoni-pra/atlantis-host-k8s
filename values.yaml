@@ -1,0 +1,128 @@
+atlantisUrl: "http://atlantis-demo.awsometatsukoni.com"
+
+orgAllowlist: "github.com/tatsukoni-pra/*"
+
+logLevel: "info"
+
+github:
+  user: foo
+  token: bar
+  secret: baz
+
+# -- To specify AWS credentials to be mapped to ~/.aws or to aws.directory.
+# Check values.yaml for examples.
+aws: {}
+# aws:
+#   credentials: |
+#     [default]
+#     aws_access_key_id=YOUR_ACCESS_KEY_ID
+#     aws_secret_access_key=YOUR_SECRET_ACCESS_KEY
+#     region=us-east-1
+#   config: |
+#     [profile a_role_to_assume]
+#     role_arn = arn:aws:iam::123456789:role/service-role/roleToAssume
+#     source_profile = default
+#   directory: "/home/atlantis/.aws"
+
+# -- To reference an already existing Secret object with AWS credentials
+awsSecretName: ""
+
+# -- To keep backwards compatibility only.
+# Deprecated (see googleServiceAccountSecrets).
+# To be used for mounting credential files (when using google provider).
+# Check values.yaml for examples.
+serviceAccountSecrets: {}
+# serviceAccountSecrets:
+#   credentials: <json file as base64 encoded string>
+#   credentials-staging: <json file as base64 encoded string>
+
+image:
+  repository: ghcr.io/runatlantis/atlantis
+  tag: "v0.29.0"
+  pullPolicy: IfNotPresent
+
+# -- Override atlantis main configuration by config map,
+# ref: https://www.runatlantis.io/docs/using-slack-hooks.html#configuring-atlantis.
+# Check values.yaml for examples.
+config: ""
+# config: |
+#   ---
+#   webhooks:
+#     - event: apply
+#       workspace-regex: .*
+#       branch-regex: .*
+#       kind: slack
+#       channel: my-channel
+
+# -- Use Server Side Repo Config,
+# ref: https://www.runatlantis.io/docs/server-side-repo-config.html.
+# Check values.yaml for examples.
+repoConfig: ""
+# Example with default configuration:
+# repoConfig: |
+#   ---
+#   repos:
+#   - id: /.*/
+#     apply_requirements: []
+#     workflow: default
+#     allowed_overrides: []
+#     allow_custom_workflows: false
+#   workflows:
+#     default:
+#       plan:
+#         steps: [init, plan]
+#       apply:
+#         steps: [apply]
+#   metrics:
+#     prometheus:
+#       endpoint: /metrics
+
+serviceAccount:
+  create: false
+  name: account-atlantis
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+
+resources:
+  requests:
+    memory: 1Gi
+    cpu: 100m
+  limits:
+    memory: 1Gi
+    cpu: 100m
+
+# -- Replica count for Atlantis pods.
+replicaCount: 1
+
+test:
+  enabled: false
+
+nodeSelector: {}
+
+tolerations: []
+
+extraManifests:
+  # targetgroup bindings
+  - apiVersion: elbv2.k8s.aws/v1beta1
+    kind: TargetGroupBinding
+    metadata:
+      namespace: atlantis
+      name: atlantis-tgb
+    spec:
+      serviceRef:
+        name: atlantis
+        port: 80
+      targetGroupARN: arn:aws:elasticloadbalancing:ap-northeast-1:083636136646:targetgroup/tg-atlantis/9cd15b2b22666a52
+      targetType: ip
+      networking:
+        ingress:
+        - from:
+            - securityGroup:
+                groupID: sg-09404dd1f6df8c55a
+          ports:
+            - protocol: TCP
