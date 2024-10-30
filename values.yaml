@@ -106,6 +106,12 @@ nodeSelector: {}
 
 tolerations: []
 
+volumeClaim:
+  enabled: true
+  dataStorage: 11Gi
+  storageClassName: "gp2-ebs"
+  accessModes: ["ReadWriteOnce"]
+
 extraManifests:
   # targetgroup bindings
   - apiVersion: elbv2.k8s.aws/v1beta1

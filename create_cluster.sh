@@ -5,7 +5,7 @@ eksctl create cluster \
   --region ap-northeast-1 \
   --version 1.30 \
   --nodegroup-name eks-work-nodegroup \
-  --node-type t3.small \
+  --node-type t3.medium \
   --nodes 1 \
   --nodes-min 1 \
   --nodes-max 1 \
